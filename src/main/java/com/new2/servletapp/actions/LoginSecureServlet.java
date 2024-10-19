@@ -1,5 +1,6 @@
 package com.new2.servletapp.actions;
 
+import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -7,13 +8,10 @@ import jakarta.servlet.http.HttpSession;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.Statement;
+import java.sql.*;
 
-//@WebServlet("/login")
-public class LoginServlet extends HttpServlet {
+@WebServlet("/loginSecure")
+public class LoginSecureServlet extends HttpServlet {
 
     public void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
 
@@ -33,11 +31,13 @@ public class LoginServlet extends HttpServlet {
                     "root",
                     ""
             );
-            Statement statement = connection.createStatement();
 
             // Vulnerable query (no prepared statement, direct user input)
-            String sql = "SELECT * FROM users WHERE username = '" + username + "' AND password = '" + password + "'";
-            ResultSet resultSet = statement.executeQuery(sql);
+            String sql = "SELECT * FROM users WHERE username = ? AND password = ?";
+            PreparedStatement statement = connection.prepareStatement(sql);
+            statement.setString(1, username);
+            statement.setString(2, password);
+            ResultSet resultSet = statement.executeQuery();
 
             if (resultSet.next()) {
                 String role = resultSet.getString("role");

@@ -23,6 +23,18 @@ public class AdminServlet extends HttpServlet {
         Connection conn;
         Statement stmt;
         PrintWriter out = resp.getWriter();
+        HttpSession session = req.getSession();
+        Object roleObject = session.getAttribute("role");
+        String role = null;
+
+        if (roleObject instanceof String) {
+            role = (String) roleObject;
+        }
+
+        if (role != "administrator") {
+            resp.getWriter().write("You are unauthorized!");
+            return;
+        }
 
         try {
             // Database connection details
