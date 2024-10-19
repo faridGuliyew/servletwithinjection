@@ -1,5 +1,6 @@
 package com.new2.servletapp.actions;
 
+import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -12,14 +13,12 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.Statement;
 
-//@WebServlet("/login")
-public class LoginServlet extends HttpServlet {
+@WebServlet("/admin")
+public class AdminServlet extends HttpServlet {
 
     public void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
 
-        String username = req.getParameter("username");
-        String password = req.getParameter("password");
-
+        String information = req.getParameter("information");
 
         Connection conn;
         Statement stmt;
@@ -36,31 +35,17 @@ public class LoginServlet extends HttpServlet {
             Statement statement = connection.createStatement();
 
             // Vulnerable query (no prepared statement, direct user input)
-            String sql = "SELECT * FROM users WHERE username = '" + username + "' AND password = '" + password + "'";
-            ResultSet resultSet = statement.executeQuery(sql);
+            String sql = "INSERT INTO information(value)  VALUES ('" + information + "');";
+            Boolean isFail = statement.execute(sql);
 
-            if (resultSet.next()) {
-                String role = resultSet.getString("role");
-//                resp.getWriter().println("Login successful. Welcome, " + username);
-                // Get or create a session object
-                HttpSession session = req.getSession();
-
-                // Store the username in the session
-                session.setAttribute("username", username);
-
-                if (role.equals("administrator")) {
-                    resp.sendRedirect("admin.jsp");
-                } else {
-                    resp.sendRedirect("index.jsp");
-                }
-                // Redirect to a welcome page
+            if (!isFail) {
+                resp.getWriter().println("Added successfully");
             } else {
-                resp.getWriter().println("Invalid username or password");
+                resp.getWriter().println("Something went wrong");
             }
         } catch (Exception e) {
             e.printStackTrace();
             resp.getWriter().println("Database error: " + e.getMessage());
         }
     }
-
 }
